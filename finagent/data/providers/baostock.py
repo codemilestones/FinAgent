@@ -6,7 +6,7 @@ BaoStock 数据提供者实现
 
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import baostock as bs
 import pandas as pd
@@ -78,7 +78,7 @@ class BaoStockProvider(BaseProvider):
     @retry_on_exception(max_retries=3, exceptions=(Exception,))
     def _query_with_rate_limit(
         self,
-        rs: bs.StockResult,
+        rs: Any,
     ) -> pd.DataFrame:
         """
         使用速率限制执行查询
@@ -110,9 +110,12 @@ class BaoStockProvider(BaseProvider):
             if cached is not None:
                 return cached
 
-        # 从 baostock 获取
-        rs = bs.query_stock_basic(code_name=stock_code)
-        df = self._query_with_rate_limit(rs)
+        # 从 baostock 获取 - 先获取所有股票再筛选
+        rs = bs.query_stock_basic()
+        all_stocks = self._query_with_rate_limit(rs)
+
+        # 筛选指定股票
+        df = all_stocks[all_stocks["code"] == stock_code]
 
         if df.empty:
             raise StockNotFoundError(f"股票不存在: {stock_code}")
@@ -195,19 +198,31 @@ class BaoStockProvider(BaseProvider):
                 return cached
 
         # 从 baostock 获取
-        rs = bs.query_dividend_data(
-            code=stock_code,
-            year="",
-            yearType="report",
-        )
-        df = self._query_with_rate_limit(rs)
+        # 如果没有指定年份，获取近几年的分红数据
+        years = ["2023", "2022", "2021", "2020"]
+
+        all_dividends = []
+        for year in years:
+            rs = bs.query_dividend_data(
+                code=stock_code,
+                year=year,
+                yearType="report",
+            )
+            df_year = self._query_with_rate_limit(rs)
+            if not df_year.empty:
+                all_dividends.append(df_year)
+
+        if all_dividends:
+            df = pd.concat(all_dividends, ignore_index=True)
+        else:
+            df = pd.DataFrame()
 
         if df.empty:
             logger.warning(f"未获取到分红数据: {stock_code}")
             return pd.DataFrame()
 
         # 转换数据类型
-        numeric_columns = ["dividendOperateRatio", "transferOperateRatio"]
+        numeric_columns = ["dividCashPsBeforeTax", "dividCashPsAfterTax", "dividStocksPs"]
         for col in numeric_columns:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -239,8 +254,14 @@ class BaoStockProvider(BaseProvider):
                 return cached
 
         # 从 baostock 获取
-        year_str = str(year) if year else ""
-        quarter_str = str(quarter) if quarter else ""
+        # 如果没有指定年份，默认获取最近4个季度的数据
+        if not year:
+            year = 2023  # 默认年份
+        if not quarter:
+            quarter = 4  # 默认季度
+
+        year_str = str(year)
+        quarter_str = str(quarter)
 
         rs = bs.query_profit_data(
             code=stock_code,
@@ -302,11 +323,11 @@ class BaoStockProvider(BaseProvider):
 
     def get_batch_history_data(
         self,
-        stock_codes: list[str],
+        stock_codes: List[str],
         start_date: str,
         end_date: str,
         frequency: str = "d",
-    ) -> dict[str, pd.DataFrame]:
+    ) -> Dict[str, pd.DataFrame]:
         """批量获取历史数据"""
         results = {}
         for code in stock_codes:

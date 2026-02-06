@@ -8,7 +8,7 @@ import json
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from pydantic import BaseModel, Field, field_validator
@@ -96,7 +96,7 @@ class Strategy:
 
     name: str  # 策略名称
     description: str = ""  # 策略描述
-    conditions: list[Condition] = field(default_factory=list)  # 选股条件
+    conditions: List[Condition] = field(default_factory=list)  # 选股条件
     sort_by: Optional[str] = None  # 排序字段
     sort_order: str = "desc"  # 排序方向 (asc/desc)
     limit: Optional[int] = None  # 返回结果数量限制
@@ -280,7 +280,7 @@ class StrategyExecutor:
     def _check_conditions(
         self,
         stock_data: dict,
-        conditions: list[Condition],
+        conditions: List[Condition],
     ) -> bool:
         """检查股票是否满足所有条件"""
         series = pd.Series(stock_data)

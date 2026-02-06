@@ -11,7 +11,7 @@ import threading
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Union
 
 import pandas as pd
 
@@ -215,7 +215,7 @@ class SQLiteCache(BaseCache):
         conn.execute("UPDATE stats SET misses = misses + 1 WHERE id = 1")
         conn.commit()
 
-    def get_stats(self) -> dict[str, int | float]:
+    def get_stats(self) -> Dict[str, Union[int, float]]:
         """获取缓存统计"""
         conn = self._get_connection()
         cursor = conn.execute("SELECT hits, misses FROM stats WHERE id = 1")

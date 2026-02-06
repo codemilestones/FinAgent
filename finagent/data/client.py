@@ -5,7 +5,7 @@
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -147,11 +147,11 @@ class DataClient:
 
     def get_batch_history_data(
         self,
-        stock_codes: list[str],
+        stock_codes: List[str],
         start_date: str,
         end_date: str,
         frequency: str = "d",
-    ) -> dict[str, pd.DataFrame]:
+    ) -> Dict[str, pd.DataFrame]:
         """
         批量获取历史数据
 
@@ -166,7 +166,7 @@ class DataClient:
         """
         return self.provider.get_batch_history_data(stock_codes, start_date, end_date, frequency)
 
-    def get_cache_stats(self) -> dict:
+    def get_cache_stats(self) -> Dict:
         """获取缓存统计"""
         if self.cache:
             return self.cache.get_stats()
