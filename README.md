@@ -84,6 +84,23 @@ FinAgent/
 
 ## 开发指南
 
+### 运行示例
+
+```bash
+# 获取股票数据示例
+python -m finagent.data.examples.fetch_recent_data --stock-code sh.600036
+
+# 计算股息率（真实数据）
+python -m finagent.data.examples.real_data_dividend_calculator \
+    --stock-code sh.600036 --price 41.2 --use-real-data
+
+# 综合示例集合
+python -m finagent.data.examples.comprehensive_examples
+
+# 性能测试
+python -m finagent.data.examples.performance_test
+```
+
 ### 创建新 Skill
 
 本项目使用 `skill-creator` 来创建新的 skill。详见 [CLAUDE.md](CLAUDE.md)。
@@ -97,6 +114,24 @@ FinAgent/
 - `/opsx:apply` - 实施变更
 - `/opsx:verify` - 验证实施
 - `/opsx:archive` - 归档已完成变更
+
+### 代码格式化
+
+```bash
+# 格式化代码
+black finagent/
+isort finagent/
+
+# 代码检查
+flake8 finagent/
+pylint finagent/
+```
+
+## 文档
+
+- [finagent/README.md](finagent/README.md) - 选股基础设施文档
+- [finagent/CONFIG.md](finagent/CONFIG.md) - 配置说明文档
+- [.claude/skills/dividend-yield-calculator/SKILL.md](.claude/skills/dividend-yield-calculator/SKILL.md) - 股息率计算器文档
 
 ## 许可证
 

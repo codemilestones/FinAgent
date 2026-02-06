@@ -168,15 +168,34 @@ finagent/
 ### 运行示例
 
 ```bash
-# 查看帮助
-python -m finagent.data.examples.real_data_dividend_calculator --help
+# 获取最近 30 天的股票数据
+python -m finagent.data.examples.fetch_recent_data --stock-code sh.600036
 
 # 计算单只股票股息率
 python -m finagent.data.examples.real_data_dividend_calculator \
     --stock-code sh.600036 \
     --price 41.2 \
     --use-real-data
+
+# 运行综合示例（包含 8 个示例场景）
+python -m finagent.data.examples.comprehensive_examples
 ```
+
+### 示例列表
+
+`finagent/data/examples/` 目录包含以下示例：
+
+1. **fetch_recent_data.py** - 获取最近 30 天的股票数据
+2. **real_data_dividend_calculator.py** - 使用真实数据计算股息率
+3. **comprehensive_examples.py** - 综合示例集合，包含：
+   - 获取股票基本信息
+   - 获取历史行情数据
+   - 获取分红数据
+   - 获取财务数据
+   - 批量查询多只股票
+   - 使用选股条件筛选
+   - 使用预设策略
+   - 缓存管理
 
 ### 代码格式化
 
